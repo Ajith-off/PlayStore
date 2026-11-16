@@ -1,79 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ment Apps — Android Apps on Google Play</title>
+<meta name="description" content="Fun and useful Android apps by Ajith — CWC Stickers, Tamil letter tracing for kids and more.">
+<meta name="theme-color" content="#0b1020">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1020; --bg2:#121a33; --card:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.12); --text:#eef2ff; --muted:#9aa5c7;
+  --blue:#3b82f6; --cyan:#22d3ee; --pink:#f472b6; --yellow:#facc15;
+  --grad:linear-gradient(135deg,var(--blue),var(--cyan));
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+.container{width:min(1150px,92%);margin:auto}
 
-  <title>Ment</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+/* ---------- Loader ---------- */
+#loader{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:999;transition:opacity .6s,visibility .6s}
+#loader.hide{opacity:0;visibility:hidden}
+.ring{width:60px;height:60px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--cyan);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  <!-- Favicons -->
-  <link href="assets/img/favicon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+/* ---------- Background ---------- */
+canvas#stars{position:fixed;inset:0;z-index:-2}
+.blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.45;z-index:-1;animation:float 18s ease-in-out infinite}
+.b1{width:420px;height:420px;background:var(--blue);top:-120px;left:-120px}
+.b2{width:360px;height:360px;background:var(--pink);bottom:-120px;right:-100px;animation-delay:-6s}
+.b3{width:280px;height:280px;background:var(--cyan);top:40%;left:55%;animation-delay:-12s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,-40px) scale(1.1)}66%{transform:translate(-40px,50px) scale(.95)}}
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+/* ---------- Progress + Nav ---------- */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:200}
+nav{position:fixed;top:0;width:100%;z-index:100;transition:.3s}
+nav.scrolled{background:rgba(11,16,32,.75);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{font-weight:800;font-size:1.4rem;display:flex;align-items:center;gap:.5rem}
+.logo span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo i{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;font-style:normal;color:#fff;font-size:1rem}
+.links{display:flex;gap:2rem;list-style:none}
+.links a{position:relative;color:var(--muted);font-weight:400;transition:.3s}
+.links a:hover,.links a.active{color:var(--text)}
+.links a::after{content:"";position:absolute;left:0;bottom:-5px;width:0;height:2px;background:var(--grad);transition:.3s}
+.links a:hover::after,.links a.active::after{width:100%}
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:0;padding:8px}
+.burger span{width:26px;height:3px;background:var(--text);border-radius:3px;transition:.3s}
+.burger.open span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
 
-  <!-- Vendor CSS Files -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:.6rem;padding:.85rem 1.6rem;border-radius:50px;font-weight:600;transition:.3s;position:relative;overflow:hidden;cursor:pointer;border:0;font-family:inherit;font-size:1rem}
+.btn-main{background:var(--grad);color:#fff;box-shadow:0 10px 30px rgba(59,130,246,.35)}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(34,211,238,.45)}
+.btn-ghost{border:1px solid var(--line);color:var(--text);background:var(--card)}
+.btn-ghost:hover{border-color:var(--cyan);transform:translateY(-3px)}
+.btn svg{width:20px;height:20px}
 
-  <!-- Template Main CSS File -->
-  <link href="assets/css/style.css" rel="stylesheet">
+/* ---------- Hero ---------- */
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:80px}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;align-items:center}
+.tag{display:inline-block;padding:.35rem 1rem;border:1px solid var(--line);border-radius:50px;font-size:.85rem;color:var(--cyan);background:var(--card);margin-bottom:1.2rem}
+.hero h1{font-size:clamp(2.2rem,5.5vw,4rem);line-height:1.15;font-weight:800}
+.hero h1 .grad{background:linear-gradient(90deg,var(--blue),var(--cyan),var(--pink),var(--blue));background-size:300%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:300%}}
+.typed{color:var(--cyan);border-right:3px solid var(--cyan);padding-right:4px;animation:blink .8s step-end infinite}
+@keyframes blink{50%{border-color:transparent}}
+.hero p{color:var(--muted);margin:1.2rem 0 2rem;font-size:1.05rem;max-width:520px}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.stats{display:flex;gap:2.5rem;margin-top:2.5rem;flex-wrap:wrap}
+.stats b{font-size:1.8rem;display:block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats small{color:var(--muted)}
 
-  <!-- =======================================================
-  * Template Name: Personal - v4.0.1
-  * Template URL: https://bootstrapmade.com/personal-free-resume-bootstrap-template/
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+/* Phone mockup */
+.phone-wrap{display:grid;place-items:center;perspective:1000px}
+.phone{width:260px;height:520px;border-radius:40px;background:#05070f;border:10px solid #1e2640;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(59,130,246,.3);position:relative;overflow:hidden;animation:bob 5s ease-in-out infinite;transform-style:preserve-3d}
+@keyframes bob{0%,100%{transform:translateY(0) rotateY(-12deg) rotateX(4deg)}50%{transform:translateY(-20px) rotateY(12deg) rotateX(-4deg)}}
+.notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:90px;height:22px;background:#1e2640;border-radius:20px;z-index:3}
+.screen{position:absolute;inset:0;padding:45px 16px 16px;background:linear-gradient(160deg,#16204a,#0b1020)}
+.screen h4{font-size:.8rem;color:var(--muted);margin-bottom:.8rem}
+.app-icons{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.app-icons div{aspect-ratio:1;border-radius:16px;display:grid;place-items:center;font-size:1.6rem;animation:pop .6s backwards}
+.app-icons div:nth-child(n){animation-delay:calc(var(--i)*.12s + 1s)}
+@keyframes pop{from{transform:scale(0) rotate(-30deg);opacity:0}}
+.notif{margin-top:18px;background:rgba(255,255,255,.08);border-radius:14px;padding:10px;font-size:.72rem;display:flex;gap:8px;align-items:center;animation:slideIn 1s 2.2s backwards}
+.notif .dot{width:30px;height:30px;border-radius:9px;background:var(--grad);flex-shrink:0;display:grid;place-items:center}
+@keyframes slideIn{from{transform:translateX(120%)}}
+.orbit{position:absolute;width:380px;height:380px;border:1px dashed var(--line);border-radius:50%;animation:spin 30s linear infinite}
+.orbit span{position:absolute;font-size:1.8rem;top:-18px;left:50%}
+.orbit span:nth-child(2){top:auto;bottom:-18px}
+.orbit span:nth-child(3){top:50%;left:-18px}
+
+/* ---------- Sections ---------- */
+section{padding:100px 0}
+.head{text-align:center;margin-bottom:3.5rem}
+.head h2{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800}
+.head p{color:var(--muted);max-width:560px;margin:.6rem auto 0}
+
+/* App cards */
+.apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:2rem;position:relative;overflow:hidden;transition:transform .2s,border-color .3s;transform-style:preserve-3d}
+.card::before{content:"";position:absolute;inset:-2px;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),rgba(34,211,238,.18),transparent 40%);opacity:0;transition:.3s;pointer-events:none}
+.card:hover::before{opacity:1}
+.card:hover{border-color:rgba(34,211,238,.5)}
+.card .icon{width:80px;height:80px;border-radius:22px;display:grid;place-items:center;font-size:2.4rem;margin-bottom:1.2rem;box-shadow:0 10px 30px rgba(0,0,0,.3);transform:translateZ(40px)}
+.card h3{font-size:1.4rem;margin-bottom:.3rem}
+.card .cat{font-size:.8rem;color:var(--cyan)}
+.card p{color:var(--muted);margin:.8rem 0 1.2rem;font-size:.95rem}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.chips span{font-size:.75rem;padding:.25rem .7rem;border-radius:50px;border:1px solid var(--line);color:var(--muted)}
+.card .btn{padding:.7rem 1.3rem;font-size:.9rem}
+.soon{opacity:.75}
+.soon .btn{pointer-events:none;filter:grayscale(1)}
+
+/* Features */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem}
+.feat{padding:1.8rem;border-radius:20px;background:var(--card);border:1px solid var(--line);text-align:center;transition:.3s}
+.feat:hover{transform:translateY(-8px);background:rgba(59,130,246,.1)}
+.feat .e{font-size:2.4rem;display:inline-block;margin-bottom:.8rem;transition:.4s}
+.feat:hover .e{transform:scale(1.25) rotate(10deg)}
+.feat h4{margin-bottom:.4rem}
+.feat p{color:var(--muted);font-size:.9rem}
+
+/* About */
+.about{display:grid;grid-template-columns:.8fr 1.2fr;gap:3rem;align-items:center}
+.avatar{width:min(300px,100%);aspect-ratio:1;margin:auto;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-size:6rem;font-weight:800;color:#fff;position:relative;animation:morph 8s ease-in-out infinite}
+@keyframes morph{0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%}50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%}}
+.about h3{font-size:1.8rem;margin-bottom:1rem}
+.about p{color:var(--muted);margin-bottom:1rem}
+.skills{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.skills span{padding:.4rem 1rem;border-radius:50px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);font-size:.85rem}
+
+/* Contact */
+.contact-box{background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(244,114,182,.15));border:1px solid var(--line);border-radius:30px;padding:clamp(2rem,5vw,4rem);text-align:center}
+.contact-box h2{font-size:clamp(1.6rem,4vw,2.5rem);margin-bottom:.8rem}
+.contact-box p{color:var(--muted);margin-bottom:2rem}
+.contact-btns{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+
+footer{padding:2rem 0;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:.9rem}
+footer a{color:var(--cyan)}
+#top{position:fixed;right:20px;bottom:20px;width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#fff;font-size:1.3rem;cursor:pointer;opacity:0;transform:translateY(20px);transition:.3s;z-index:90;box-shadow:0 10px 25px rgba(59,130,246,.4)}
+#top.show{opacity:1;transform:none}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(50px);transition:opacity .8s ease,transform .8s ease}
+.reveal.show{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* ---------- Responsive ---------- */
+@media (max-width:900px){
+  .hero-grid,.about{grid-template-columns:1fr;text-align:center}
+  .hero p{margin-inline:auto}
+  .hero-btns,.stats{justify-content:center}
+  .phone-wrap{margin-top:2rem}
+  .orbit{width:320px;height:320px}
+}
+@media (max-width:760px){
+  .burger{display:flex}
+  .links{position:fixed;top:70px;right:0;height:calc(100vh - 70px);width:75%;max-width:300px;flex-direction:column;gap:0;background:rgba(11,16,32,.97);backdrop-filter:blur(14px);border-left:1px solid var(--line);padding:2rem;transform:translateX(100%);transition:.4s}
+  .links.open{transform:none}
+  .links li{opacity:0;transform:translateX(30px);transition:.4s}
+  .links.open li{opacity:1;transform:none}
+  .links.open li:nth-child(2){transition-delay:.05s}.links.open li:nth-child(3){transition-delay:.1s}.links.open li:nth-child(4){transition-delay:.15s}.links.open li:nth-child(5){transition-delay:.2s}
+  .links a{display:block;padding:1rem 0;font-size:1.1rem;border-bottom:1px solid var(--line)}
+  .links a::after{display:none}
+  section{padding:70px 0}
+  .phone{width:220px;height:440px}
+  .orbit{width:280px;height:280px}
+  .apps{grid-template-columns:1fr}
+  .blob{opacity:.3}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
 </head>
-
 <body>
 
-  <!-- ======= Header ======= -->
-  <header id="header">
-    <div class="container">
+<div id="loader"><div class="ring"></div></div>
+<div id="progress"></div>
+<canvas id="stars"></canvas>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 
-      <h1><a href="index.html">Coming Soon</a></h1>
-      <!-- Uncomment below if you prefer to use an image logo -->
-      <!-- <a href="index.html" class="mr-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a> -->
-      <!--<h2><span>Thank you for Installation</span></h2>-->
-      <nav>
-        <i></i>
-      </nav><!-- .navbar -->
-    </div>
-  </header><!-- End Header -->
+<!-- ============ NAV ============ -->
+<nav id="nav">
+  <div class="container nav-in">
+    <a href="#home" class="logo"><i>M</i><span>Ment</span></a>
+    <ul class="links" id="links">
+      <li><a href="#home" class="active">Home</a></li>
+      <li><a href="#apps">Apps</a></li>
+      <li><a href="#why">Why Us</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
 
-  <!-- ======= About Section ======= -->
-  <section id="about" class="about">
-
-    <!-- ======= About Me ======= -->
-    <div class="about-me container">
-
-      <div class="section-title">
-        <h2>About</h2>
-        <p>Learn more about me</p>
+<!-- ============ HERO ============ -->
+<header class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <span class="tag reveal">🚀 Android Developer</span>
+      <h1 class="reveal d1">Building <span class="grad">fun &amp; useful</span><br>apps for <span class="typed" id="typed"></span></h1>
+      <p class="reveal d2">Simple, smooth and colourful Android apps — from sticker packs for your chats to Tamil learning games for kids. Free to download on Google Play.</p>
+      <div class="hero-btns reveal d3">
+        <a href="#apps" class="btn btn-main">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+          Explore Apps
+        </a>
+        <a href="#contact" class="btn btn-ghost">Contact Me</a>
       </div>
+      <div class="stats reveal d4">
+        <div><b class="count" data-to="2">0</b><small>Apps Live</small></div>
+        <div><b class="count" data-to="100" data-suffix="%">0</b><small>Free</small></div>
+        <div><b class="count" data-to="5" data-suffix="★">0</b><small>Made with love</small></div>
+      </div>
+    </div>
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="assets/vendor/purecounter/purecounter.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
+    <div class="phone-wrap reveal d2">
+      <div class="orbit"><span>⭐</span><span>💬</span><span>✏️</span></div>
+      <div class="phone" id="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <h4>My Apps</h4>
+          <div class="app-icons">
+            <div style="--i:0;background:linear-gradient(135deg,#f472b6,#fb923c)">😎</div>
+            <div style="--i:1;background:linear-gradient(135deg,#3b82f6,#22d3ee)">அ</div>
+            <div style="--i:2;background:linear-gradient(135deg,#a855f7,#6366f1)">🎨</div>
+            <div style="--i:3;background:linear-gradient(135deg,#22c55e,#14b8a6)">📚</div>
+            <div style="--i:4;background:linear-gradient(135deg,#facc15,#f97316)">⭐</div>
+            <div style="--i:5;background:linear-gradient(135deg,#ef4444,#ec4899)">❤️</div>
+          </div>
+          <div class="notif"><div class="dot">🔔</div><div><b>New update!</b><br>Fresh stickers added</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
 
-  <!-- Template Main JS File -->
-  <script src="assets/js/main.js"></script>
+<!-- ============ APPS ============ -->
+<section id="apps">
+  <div class="container">
+    <div class="head reveal">
+      <span class="tag">📱 My Apps</span>
+      <h2>Apps on Google Play</h2>
+      <p>Tap any app to open it on the Play Store.</p>
+    </div>
+    <div class="apps" id="appGrid"><!-- cards are built from the APPS list in the script below --></div>
+  </div>
+</section>
 
+<!-- ============ FEATURES ============ -->
+<section id="why">
+  <div class="container">
+    <div class="head reveal">
+      <span class="tag">✨ Why my apps</span>
+      <h2>Made to feel great</h2>
+    </div>
+    <div class="features">
+      <div class="feat reveal d1"><div class="e">⚡</div><h4>Fast &amp; Light</h4><p>Small download size, works smoothly even on budget phones.</p></div>
+      <div class="feat reveal d2"><div class="e">🎨</div><h4>Colourful UI</h4><p>Bright, clean designs that are easy for everyone to use.</p></div>
+      <div class="feat reveal d3"><div class="e">👨‍👩‍👧</div><h4>Family Friendly</h4><p>Safe content for kids and adults alike.</p></div>
+      <div class="feat reveal d4"><div class="e">🔄</div><h4>Regular Updates</h4><p>New content and improvements added often.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="about">
+  <div class="container about">
+    <div class="reveal"><div class="avatar">A</div></div>
+    <div class="reveal d2">
+      <span class="tag">👋 About Me</span>
+      <h3>Hi, I'm Ajith</h3>
+      <p></p>I'm a software developer interested in building useful applications and digital experiences. I enjoy exploring new technologies, developing ideas and turning them into practical products.</p>
+      <div class="skills">
+        <span>Android</span><span>Kotlin / Java</span><span>Flutter</span><span>Firebase</span><span>AdMob</span><span>UI Design</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-box reveal">
+      <h2>Have an idea or feedback? 💡</h2>
+      <p>I'd love to hear from you — suggestions, bug reports or collaboration.</p>
+      <div class="contact-btns">
+        <!-- EDIT: put your own email / links here -->
+        <a href="mailto:akstick2@gmail.com" class="btn btn-main">✉️ Email Me</a>
+        <!-- <a href="https://play.google.com/store/apps/dev?id=YOUR_DEV_ID" target="_blank" rel="noopener" class="btn btn-ghost">▶ Developer Page</a> -->
+        <a href="https://github.com/Ajith-off/Ajith" target="_blank" rel="noopener" class="btn btn-ghost">💻 GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    © <span id="year"></span> Ment Apps · Made with ❤️ · <a href="privacy.html">Privacy Policy</a>
+  </div>
+</footer>
+
+<button id="top" aria-label="Back to top">↑</button>
+
+<script>
+/* =========================================================
+   EDIT YOUR APPS HERE — add / remove objects to change cards
+   ========================================================= */
+const APPS = [
+  {
+    name: "Tamil Stickers",
+    cat: "Communication and Fun · Stickers",
+    icon: "😎",
+    color: "linear-gradient(135deg,#f472b6,#fb923c)",
+    desc: "A huge collection of fun stickers to add straight to WhatsApp. Express every mood in your chats!",
+    tags: ["WhatsApp", "Free", "Offline"],
+    link: "https://play.google.com/store/apps/details?id=com.ak.cwc_stickers"
+  },
+  {
+    name: "Tamil Letter Tracing",
+    cat: "Education · Kids",
+    icon: "அ",
+    color: "linear-gradient(135deg,#3b82f6,#22d3ee)",
+    desc: "Kids learn to write Tamil letters by tracing them with their finger — with sounds, colours and rewards.",
+    tags: ["Kids", "Tamil", "Learning"],
+    link: "#"   // EDIT: paste your Play Store link
+  },
+  {
+    name: "More Coming Soon",
+    cat: "In development",
+    icon: "🚧",
+    color: "linear-gradient(135deg,#64748b,#334155)",
+    desc: "New apps are on the way. Stay tuned for updates!",
+    tags: ["Soon"],
+    link: "",
+    soon: true
+  }
+];
+
+/* ---------- Build app cards ---------- */
+const grid = document.getElementById('appGrid');
+APPS.forEach((a, i) => {
+  const el = document.createElement('div');
+  el.className = `card reveal d${(i % 3) + 1}${a.soon ? ' soon' : ''}`;
+  el.innerHTML = `
+    <div class="icon" style="background:${a.color}">${a.icon}</div>
+    <h3>${a.name}</h3><span class="cat">${a.cat}</span>
+    <p>${a.desc}</p>
+    <div class="chips">${a.tags.map(t => `<span>${t}</span>`).join('')}</div>
+    <a class="btn btn-main" href="${a.link || '#'}" ${a.link && a.link !== '#' ? 'target="_blank" rel="noopener"' : ''}>
+      ${a.soon ? 'Coming Soon' : '⬇ Get it on Google Play'}
+    </a>`;
+  grid.appendChild(el);
+});
+
+/* ---------- Loader ---------- */
+window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').classList.add('hide'), 400));
+
+/* ---------- Typing effect ---------- */
+const words = ["everyone.", "kids.", "WhatsApp.", "Tamil learners.", "you!"];
+const typed = document.getElementById('typed');
+let w = 0, c = 0, del = false;
+(function type() {
+  const word = words[w];
+  typed.textContent = word.slice(0, c);
+  if (!del && c < word.length) c++;
+  else if (del && c > 0) c--;
+  else if (!del) { del = true; return setTimeout(type, 1500); }
+  else { del = false; w = (w + 1) % words.length; }
+  setTimeout(type, del ? 50 : 100);
+})();
+
+/* ---------- Mobile menu ---------- */
+const burger = document.getElementById('burger'), links = document.getElementById('links');
+burger.onclick = () => { burger.classList.toggle('open'); links.classList.toggle('open'); };
+links.querySelectorAll('a').forEach(a => a.onclick = () => { burger.classList.remove('open'); links.classList.remove('open'); });
+
+/* ---------- Scroll: nav, progress, top button, active link ---------- */
+const nav = document.getElementById('nav'), prog = document.getElementById('progress'), topBtn = document.getElementById('top');
+const sections = [...document.querySelectorAll('header[id],section[id]')];
+window.addEventListener('scroll', () => {
+  const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+  nav.classList.toggle('scrolled', y > 30);
+  topBtn.classList.toggle('show', y > 500);
+  prog.style.width = (y / h * 100) + '%';
+  let cur = sections[0].id;
+  sections.forEach(s => { if (y >= s.offsetTop - 150) cur = s.id; });
+  links.querySelectorAll('a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+}, { passive: true });
+topBtn.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+
+/* ---------- Reveal on scroll + counters ---------- */
+const io = new IntersectionObserver(entries => entries.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('show');
+  e.target.querySelectorAll('.count').forEach(countUp);
+  io.unobserve(e.target);
+}), { threshold: .15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+function countUp(el) {
+  const to = +el.dataset.to, suf = el.dataset.suffix || '';
+  let n = 0; const step = Math.max(1, Math.ceil(to / 40));
+  const t = setInterval(() => { n = Math.min(to, n + step); el.textContent = n + suf; if (n >= to) clearInterval(t); }, 30);
+}
+
+/* ---------- 3D tilt + glow on cards (desktop only) ---------- */
+if (matchMedia('(hover:hover)').matches) {
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      card.style.setProperty('--mx', x + 'px'); card.style.setProperty('--my', y + 'px');
+      card.style.transform = `perspective(800px) rotateY(${(x / r.width - .5) * 12}deg) rotateX(${(.5 - y / r.height) * 12}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', () => card.style.transform = '');
+  });
+}
+
+/* ---------- Starfield background ---------- */
+const cv = document.getElementById('stars'), ctx = cv.getContext('2d');
+let stars = [];
+function resize() {
+  cv.width = innerWidth; cv.height = innerHeight;
+  const n = innerWidth < 760 ? 60 : 140;
+  stars = Array.from({ length: n }, () => ({ x: Math.random() * cv.width, y: Math.random() * cv.height, r: Math.random() * 1.6 + .2, s: Math.random() * .4 + .1, a: Math.random() }));
+}
+function draw() {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  stars.forEach(s => {
+    s.y -= s.s; if (s.y < 0) { s.y = cv.height; s.x = Math.random() * cv.width; }
+    s.a += (Math.random() - .5) * .05; s.a = Math.max(.2, Math.min(1, s.a));
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,220,255,${s.a})`; ctx.fill();
+  });
+  requestAnimationFrame(draw);
+}
+addEventListener('resize', resize); resize(); draw();
+
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 </body>
-
 </html>
